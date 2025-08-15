@@ -12,7 +12,7 @@ import { shallow } from 'zustand/shallow';
 // import { TextNode } from './nodes/textNode';
 
 import 'reactflow/dist/style.css';
-import { nodeTypes } from './nodes';
+import { demoNodeConfigs, nodeTypes } from './nodes';
 
 const gridSize = 20;
 const proOptions = { hideAttribution: true };
@@ -89,29 +89,54 @@ export const PipelineUI = () => {
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
+  const handleClick = (type) => {
+    const nodeID = getNodeID(type);
+    const newNode = {
+      id: nodeID,
+      type: type, // must match nodeTypes
+      position: { x: 250, y: 100 + nodes.length * 80 },
+      data: getInitNodeData(nodeID, type),
+    };
+
+    addNode(newNode);
+  }
+
   return (
-    <>
-      <div ref={reactFlowWrapper} style={{ width: '100wv', height: '70vh' }}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-          onInit={setReactFlowInstance}
-          nodeTypes={nodeTypes}
-          proOptions={proOptions}
-          snapGrid={[gridSize, gridSize]}
-          connectionLineType='smoothstep'
-          deleteKeyCode={8}
-        >
-          <Background color="#aaa" gap={gridSize} />
-          <Controls />
-          <MiniMap />
-        </ReactFlow>
-      </div>
-    </>
+    <div ref={reactFlowWrapper} style={{ width: '100wv', height: '70vh' }}>
+      {
+        Object.keys(demoNodeConfigs).map((item, index) => {
+          const ourNode = demoNodeConfigs[item]
+          return (
+            <button key={index}
+              onClick={() => handleClick(ourNode?.type)}
+              style={{ position: "absolute", top: 10, left: 10 * (index * 15), zIndex: 10 }}
+            >
+              {ourNode.title}
+            </button>
+          )
+        })
+      }
+
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        onInit={setReactFlowInstance}
+        nodeTypes={nodeTypes}
+        proOptions={proOptions}
+        snapGrid={[gridSize, gridSize]}
+        connectionLineType='smoothstep'
+        deleteKeyCode={8}
+      >
+        <Background color="#aaa" gap={gridSize} />
+        <Controls />
+        <MiniMap />
+      </ReactFlow>
+    </div>
+
   )
 }
