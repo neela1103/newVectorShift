@@ -1,27 +1,17 @@
-// ui.js
-// Displays the drag-and-drop UI
-// --------------------------------------------------
-
 import { useState, useRef, useCallback } from 'react';
 import ReactFlow, { Controls, Background, MiniMap } from 'reactflow';
 import { useStore } from './store';
 import { shallow } from 'zustand/shallow';
-// import { InputNode } from './nodes/inputNode';
-// import { LLMNode } from './nodes/llmNode';
-// import { OutputNode } from './nodes/outputNode';
-// import { TextNode } from './nodes/textNode';
+import { Icon } from '@iconify/react';
 
 import 'reactflow/dist/style.css';
 import { demoNodeConfigs, nodeTypes } from './nodes';
+import { SubmitButton } from './submit';
+import { Box, Button, Typography } from '@mui/material';
 
 const gridSize = 20;
 const proOptions = { hideAttribution: true };
-// const nodeTypes = {
-//   customInput: InputNode,
-//   llm: LLMNode,
-//   customOutput: OutputNode,
-//   text: TextNode,
-// };
+
 
 const selector = (state) => ({
   nodes: state.nodes,
@@ -31,6 +21,7 @@ const selector = (state) => ({
   onNodesChange: state.onNodesChange,
   onEdgesChange: state.onEdgesChange,
   onConnect: state.onConnect,
+  removeNode: state.removeNode
 });
 
 export const PipelineUI = () => {
@@ -43,11 +34,14 @@ export const PipelineUI = () => {
     addNode,
     onNodesChange,
     onEdgesChange,
-    onConnect
+    onConnect,
+    removeNode
   } = useStore(selector, shallow);
 
   const getInitNodeData = (nodeID, type) => {
-    let nodeData = { id: nodeID, nodeType: `${type}` };
+    let nodeData = {
+      id: nodeID, nodeType: `${type}`, onDelete: () => removeNode(nodeID)
+    };
     return nodeData;
   }
 
@@ -102,21 +96,36 @@ export const PipelineUI = () => {
   }
 
   return (
-    <div ref={reactFlowWrapper} style={{ width: '100wv', height: '70vh' }}>
-      {
-        Object.keys(demoNodeConfigs).map((item, index) => {
-          const ourNode = demoNodeConfigs[item]
-          return (
-            <button key={index}
-              onClick={() => handleClick(ourNode?.type)}
-              style={{ position: "absolute", top: 10, left: 10 * (index * 15), zIndex: 10 }}
-            >
-              {ourNode.title}
-            </button>
-          )
-        })
-      }
-
+    <div ref={reactFlowWrapper} style={{ width: '100wv', height: '80vh' }}>
+      <Box sx={{ height: "10vh", display: 'flex', justifyContent: "center", alignItems: 'center', gap: 2 }}>
+        {
+          Object.keys(demoNodeConfigs).map((item, index) => {
+            const ourNode = demoNodeConfigs[item]
+            return (
+              <Button key={`${item.id}${index}`}
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  width: "120px",
+                  height: "40px",
+                  background: "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  boxShadow: "0px 4px 12px rgba(0,0,0,0.3)",
+                  "&:hover": {
+                    background: "linear-gradient(90deg, #5a0fbf 0%, #1e63e9 100%)", // slightly darker on hover
+                  },
+                }}
+                onClick={() => handleClick(ourNode?.type)}
+              >
+                <Icon icon={ourNode.icon} style={{ fontSize: "20px" }} />
+                <Typography variant='caption' sx={{ textTransform: "capitalize", lineHeight: 1.1 }}>{ourNode.title.toLowerCase()}</Typography>
+              </Button>
+            )
+          })
+        }
+      </Box>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -132,10 +141,15 @@ export const PipelineUI = () => {
         connectionLineType='smoothstep'
         deleteKeyCode={8}
       >
+
         <Background color="#aaa" gap={gridSize} />
         <Controls />
         <MiniMap />
+
       </ReactFlow>
+      <Box sx={{ height: "10vh", display: "flex", justifyContent: "center", alignitem: "center" }}>
+        <SubmitButton nodes={nodes} edges={edges} />
+      </Box>
     </div>
 
   )

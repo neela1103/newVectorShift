@@ -1,15 +1,73 @@
+// nodes/index.js
 import { makeNodeConfig, POS } from '../utils/nodeConfig';
 import { createNodeComponent } from './base/createNode';
 
+const InputNodeConfig = makeNodeConfig({
+  type: 'inputNode',
+  title: 'Input',
+  icon: "material-symbols:input-rounded",
+  description: 'Pipeline input node',
+  theme: { borderColor: '#3b82f6' },
+  inputs: [],
+  outputs: [{ id: 'out', side: POS.right }],
+  fields: [
+    { key: 'value', label: 'Value', input: 'text', placeholder: 'Enter input...' },
+  ],
+  defaults: { value: '' },
+});
 
-// Existing nodes (optional: convert them later using the same pattern)
+const OutputNodeConfig = makeNodeConfig({
+  type: 'outputNode',
+  title: 'Output',
+  icon: "material-symbols:output-rounded",
+  description: 'Pipeline output node',
+  theme: { borderColor: '#f43f5e' },
+  inputs: [{ id: 'in', side: POS.left }],
+  outputs: [],
+  fields: [],
+  defaults: {},
+});
 
-// Five NEW demo nodes (declarative!)
+const LLMNodeConfig = makeNodeConfig({
+  type: 'llmNode',
+  title: 'LLM',
+  icon: "ph:open-ai-logo",
+  description: 'Language model node',
+  theme: { borderColor: '#22c55e' },
+  inputs: [{ id: 'prompt', side: POS.left }],
+  outputs: [{ id: 'response', side: POS.right }],
+  fields: [
+    {
+      key: 'model', label: 'Model', input: 'select', options: [
+        { value: 'gpt-3.5', label: 'GPT-3.5' },
+        { value: 'gpt-4', label: 'GPT-4' }
+      ]
+    },
+  ],
+  defaults: {},
+});
+
+const TextNodeConfig = makeNodeConfig({
+  type: 'textNode',
+  title: 'Text',
+  icon: 'icon-park-outline:text',
+  description: 'Provide static text / Valid variable Name',
+  theme: { borderColor: '#eab308' },
+  inputs: [],
+  outputs: [{ id: 'text', side: POS.right }],
+  fields: [
+    { key: 'text', label: 'Text', input: 'textarea', placeholder: 'Enter valid variables using {{}}' },
+  ],
+  defaults: { text: '' },
+});
+
+
 const CsvInputConfig = makeNodeConfig({
   type: 'csvInput',
   title: 'CSV Input',
+  icon: "line-md:file",
   description: 'Provide CSV text or URL to feed data.',
-  theme: { accent: '#0ea5e9' },
+  theme: { borderColor: '#0ea5e9' },
   inputs: [],
   outputs: [{ id: 'data', side: POS.right }],
   fields: [
@@ -22,8 +80,9 @@ const CsvInputConfig = makeNodeConfig({
 const PromptTemplateConfig = makeNodeConfig({
   type: 'promptTemplate',
   title: 'Prompt Template',
+  icon: "icon-park-outline:page-template",
   description: 'Templatize prompts with {{variables}}.',
-  theme: { accent: '#22c55e' },
+  theme: { borderColor: '#22c55e' },
   inputs: [{ id: 'vars', side: POS.left }],
   outputs: [{ id: 'prompt', side: POS.right }],
   fields: [
@@ -35,8 +94,9 @@ const PromptTemplateConfig = makeNodeConfig({
 const RegexCleanConfig = makeNodeConfig({
   type: 'regexClean',
   title: 'Regex Clean',
+  icon: "lucide:regex",
   description: 'Remove matches or extract groups with RegExp.',
-  theme: { accent: '#f59e0b' },
+  theme: { borderColor: '#f59e0b' },
   inputs: [{ id: 'text', side: POS.left }],
   outputs: [{ id: 'cleaned', side: POS.right }],
   fields: [
@@ -46,24 +106,30 @@ const RegexCleanConfig = makeNodeConfig({
   defaults: { pattern: '', mode: 'Remove' },
 });
 
-const SentimentConfig = makeNodeConfig({
-  type: 'sentiment',
-  title: 'Sentiment',
-  description: 'Simple sentiment label (demo).',
-  theme: { accent: '#ef4444' },
-  inputs: [{ id: 'text', side: POS.left }],
-  outputs: [{ id: 'label', side: POS.right }],
-  fields: [
-    { key: 'threshold', label: 'Pos Threshold', input: 'number', placeholder: '0.6' },
+
+const RandomNumberConfig = makeNodeConfig({
+  type: 'randomNumber',
+  title: 'Random Number',
+  icon: "mingcute:random-line",
+  description: 'Generates a random number between min and max.',
+  theme: { borderColor: '#10b981' },
+  inputs: [
+    { id: 'min', side: POS.left },
+    { id: 'max', side: POS.left },
   ],
-  defaults: { threshold: 0.6 },
+  outputs: [{ id: 'value', side: POS.right }],
+  fields: [
+    { key: 'integer', label: 'Integer Only', input: 'checkbox', placeholder: '' },
+  ],
+  defaults: { integer: false },
 });
 
 const MathAggregateConfig = makeNodeConfig({
   type: 'mathAggregate',
   title: 'Math Aggregate',
+  icon: "ph:math-operations-fill",
   description: 'Aggregate numbers (sum/avg/min/max).',
-  theme: { accent: '#8b5cf6' },
+  theme: { borderColor: '#8b5cf6' },
   inputs: [{ id: 'numbers', side: POS.left }],
   outputs: [{ id: 'result', side: POS.right }],
   fields: [
@@ -72,19 +138,26 @@ const MathAggregateConfig = makeNodeConfig({
   defaults: { op: 'sum' },
 });
 
-// Build components from configs
 export const nodeTypes = {
+  inputNode: createNodeComponent(InputNodeConfig),
+  outputNode: createNodeComponent(OutputNodeConfig),
+  llmNode: createNodeComponent(LLMNodeConfig),
+  textNode: createNodeComponent(TextNodeConfig),
   csvInput: createNodeComponent(CsvInputConfig),
   promptTemplate: createNodeComponent(PromptTemplateConfig),
   regexClean: createNodeComponent(RegexCleanConfig),
-  sentiment: createNodeComponent(SentimentConfig),
+  randomNumber: createNodeComponent(RandomNumberConfig),
   mathAggregate: createNodeComponent(MathAggregateConfig),
 };
 
 export const demoNodeConfigs = {
+  InputNodeConfig,
+  OutputNodeConfig,
+  LLMNodeConfig,
+  TextNodeConfig,
   CsvInputConfig,
   PromptTemplateConfig,
   RegexCleanConfig,
-  SentimentConfig,
+  RandomNumberConfig,
   MathAggregateConfig,
 };
